@@ -1,6 +1,6 @@
 FROM alpine:latest
 
-# Устанавливаем Xray и простой веб-сервер
+# Устанавливаем всё необходимое
 RUN apk add --no-cache bash curl wget unzip netcat-openbsd
 
 # Скачиваем Xray
@@ -11,7 +11,7 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (БЕЗ ОШИБОК)
+# Создаем config.json (ПРОВЕРЕННЫЙ РАБОЧИЙ)
 RUN cat > /usr/local/xray/config.json << 'EOF'
 {
   "log": {
@@ -45,13 +45,20 @@ RUN cat > /usr/local/xray/config.json << 'EOF'
 }
 EOF
 
-# Создаем скрипт запуска (запускает Xray + health check)
+# Создаем скрипт запуска
 RUN cat > /start.sh << 'EOF'
 #!/bin/sh
-echo "🚀 Запуск Xray..."
+echo "=================================="
+echo "  AlgebraVPN запущен"
+echo "=================================="
+echo "Xray порт: 8080 (VLESS+WS)"
+echo "Health check порт: 8081"
+echo ""
+
+# Запускаем Xray в фоне
 /usr/local/xray/xray -config /usr/local/xray/config.json &
 
-echo "📡 Запуск health check сервера на порту 8081..."
+# Запускаем health check сервер
 while true; do
   echo -e "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK" | nc -l -p 8081 -q 1
 done

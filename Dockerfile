@@ -11,49 +11,19 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json
-RUN cat > /usr/local/xray/config.json << 'EOF'
-{
-  "log": {
-    "loglevel": "warning"
-  },
-  "inbounds": [
-    {
-      "port": 8080,
-      "protocol": "vless",
-      "settings": {
-        "clients": [
-          {
-            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a"
-          }
-        ],
-        "decryption": "none"
-      },
-      "streamSettings": {
-        "network": "ws",
-        "wsSettings": {
-          "path": "/vless"
-        }
-      }
-    }
-  ],
-  "outbounds": [
-    {
-      "protocol": "freedom"
-    }
-  ]
-}
-EOF
+# Создаем config.json (исправленное экранирование)
+RUN echo '{"log":{"loglevel":"warning"},"inbounds":[{"port":8080,"protocol":"vless","settings":{"clients":[{"id":"30a587b7-ef47-4706-bc55-f9f7d34b468a"}],"decryption":"none"},"streamSettings":{"network":"ws","wsSettings":{"path":"/vless"}}}],"outbounds":[{"protocol":"freedom"}]}' > /usr/local/xray/config.json
+
+# Проверяем что файл создался
+RUN cat /usr/local/xray/config.json
 
 # Создаем скрипт запуска
-RUN cat > /start.sh << 'EOF'
-#!/bin/sh
-echo "=================================="
-echo "  AlgebraVPN запущен"
-echo "=================================="
-echo "Запускаем Xray на порту 8080..."
-/usr/local/xray/xray -config /usr/local/xray/config.json
-EOF
+RUN echo '#!/bin/sh' > /start.sh && \
+    echo 'echo "=================================="' >> /start.sh && \
+    echo 'echo "  AlgebraVPN запущен"' >> /start.sh && \
+    echo 'echo "=================================="' >> /start.sh && \
+    echo 'echo "Запускаем Xray на порту 8080..."' >> /start.sh && \
+    echo '/usr/local/xray/xray -config /usr/local/xray/config.json' >> /start.sh
 
 RUN chmod +x /start.sh
 

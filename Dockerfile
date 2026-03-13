@@ -11,7 +11,7 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (ПРОВЕРЕННЫЙ РАБОЧИЙ)
+# Создаем config.json
 RUN cat > /usr/local/xray/config.json << 'EOF'
 {
   "log": {
@@ -52,20 +52,14 @@ echo "=================================="
 echo "  AlgebraVPN запущен"
 echo "=================================="
 echo "Xray порт: 8080 (VLESS+WS)"
-echo "Health check порт: 8081"
 echo ""
 
-# Запускаем Xray в фоне
-/usr/local/xray/xray -config /usr/local/xray/config.json &
-
-# Запускаем health check сервер
-while true; do
-  echo -e "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK" | nc -l -p 8081 -q 1
-done
+# Запускаем Xray
+/usr/local/xray/xray -config /usr/local/xray/config.json
 EOF
 
 RUN chmod +x /start.sh
 
-EXPOSE 8080 8081
+EXPOSE 8080
 
 CMD ["/start.sh"]

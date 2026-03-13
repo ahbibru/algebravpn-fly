@@ -11,8 +11,38 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (исправленное экранирование)
-RUN echo '{"log":{"loglevel":"warning"},"inbounds":[{"port":8080,"protocol":"vless","settings":{"clients":[{"id":"30a587b7-ef47-4706-bc55-f9f7d34b468a"}],"decryption":"none"},"streamSettings":{"network":"ws","wsSettings":{"path":"/vless"}}}],"outbounds":[{"protocol":"freedom"}]}' > /usr/local/xray/config.json
+# Создаем config.json (ИСПРАВЛЕННЫЙ - с encryption:none)
+RUN echo '{\
+  "log": {\
+    "loglevel": "warning"\
+  },\
+  "inbounds": [\
+    {\
+      "port": 8080,\
+      "protocol": "vless",\
+      "settings": {\
+        "clients": [\
+          {\
+            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a",\
+            "encryption": "none"\
+          }\
+        ],\
+        "decryption": "none"\
+      },\
+      "streamSettings": {\
+        "network": "ws",\
+        "wsSettings": {\
+          "path": "/vless"\
+        }\
+      }\
+    }\
+  ],\
+  "outbounds": [\
+    {\
+      "protocol": "freedom"\
+    }\
+  ]\
+}' > /usr/local/xray/config.json
 
 # Проверяем что файл создался
 RUN cat /usr/local/xray/config.json

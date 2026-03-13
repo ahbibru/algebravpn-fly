@@ -11,7 +11,7 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (АБСОЛЮТНО ПРАВИЛЬНЫЙ)
+# ✅ ИСПРАВЛЕННЫЙ config.json (без encryption в clients)
 RUN echo '{\
   "log": {\
     "loglevel": "warning"\

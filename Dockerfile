@@ -1,12 +1,62 @@
 FROM alpine:latest
 
-# Устанавливаем простой веб-сервер для теста
-RUN apk add --no-cache netcat-openbsd
+# Устанавливаем всё необходимое
+RUN apk add --no-cache bash curl wget unzip netcat-openbsd
 
-# Открываем порт
+# Скачиваем Xray
+RUN mkdir -p /usr/local/xray && \
+    cd /usr/local/xray && \
+    wget -O xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
+    unzip xray.zip && \
+    rm xray.zip && \
+    chmod +x xray
+
+# Создаем config.json
+RUN cat > /usr/local/xray/config.json << 'EOF'
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "port": 8080,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/vless"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}
+EOF
+
+# Создаем скрипт запуска
+RUN cat > /start.sh << 'EOF'
+#!/bin/sh
+echo "=================================="
+echo "  AlgebraVPN запущен"
+echo "=================================="
+echo "Запускаем Xray на порту 8080..."
+/usr/local/xray/xray -config /usr/local/xray/config.json
+EOF
+
+RUN chmod +x /start.sh
+
 EXPOSE 8080
 
-# Запускаем простейший HTTP-сервер
-CMD while true; do \
-  echo -e "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nOK" | nc -l -p 8080 -q 1; \
-done
+CMD ["/start.sh"]

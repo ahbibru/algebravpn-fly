@@ -5,7 +5,7 @@ primary_region = "fra"
   dockerfile = "Dockerfile"
 
 [http_service]
-  internal_port = 8080
+  internal_port = 8081  # Health check порт
   force_https = true
   auto_stop_machines = false
   auto_start_machines = true
@@ -13,8 +13,8 @@ primary_region = "fra"
   
   [http_service.checks]
     [http_service.checks.status]
-      grace_period = "10s"
-      interval = "15s"
-      timeout = "5s"
+      grace_period = "5s"
+      interval = "10s"
+      timeout = "3s"
       method = "GET"
       path = "/"

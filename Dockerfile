@@ -11,7 +11,7 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (ПРАВИЛЬНАЯ ВЕРСИЯ)
+# Создаем config.json (АБСОЛЮТНО ПРАВИЛЬНЫЙ)
 RUN echo '{\
   "log": {\
     "loglevel": "warning"\

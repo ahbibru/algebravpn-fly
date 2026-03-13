@@ -11,7 +11,7 @@ RUN mkdir -p /usr/local/xray && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаем config.json (ИСПРАВЛЕННЫЙ - с encryption:none)
+# Создаем config.json (ПРАВИЛЬНАЯ ВЕРСИЯ)
 RUN echo '{\
   "log": {\
     "loglevel": "warning"\
@@ -23,8 +23,7 @@ RUN echo '{\
       "settings": {\
         "clients": [\
           {\
-            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a",\
-            "encryption": "none"\
+            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a"\
           }\
         ],\
         "decryption": "none"\

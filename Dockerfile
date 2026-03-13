@@ -1,49 +1,64 @@
 FROM alpine:latest
 
-# Устанавливаем Xray
-RUN apk add --no-cache bash curl wget unzip && \
-    mkdir -p /usr/local/xray && \
+# Устанавливаем Xray и простой веб-сервер
+RUN apk add --no-cache bash curl wget unzip netcat-openbsd
+
+# Скачиваем Xray
+RUN mkdir -p /usr/local/xray && \
     cd /usr/local/xray && \
     wget -O xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip && \
     unzip xray.zip && \
     rm xray.zip && \
     chmod +x xray
 
-# Создаём config.json прямо в Dockerfile (если файла нет)
-RUN echo '{\n\
-  "log": {\n\
-    "loglevel": "warning"\n\
-  },\n\
-  "inbounds": [\n\
-    {\n\
-      "port": 8080,\n\
-      "protocol": "vless",\n\
-      "settings": {\n\
-        "clients": [\n\
-          {\n\
-            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a",\n\
-            "flow": ""\n\
-          }\n\
-        ],\n\
-        "decryption": "none"\n\
-      },\n\
-      "streamSettings": {\n\
-        "network": "ws",\n\
-        "wsSettings": {\n\
-          "path": "/vless"\n\
-        }\n\
-      }\n\
-    }\n\
-  ],\n\
-  "outbounds": [\n\
-    {\n\
-      "protocol": "freedom"\n\
-    }\n\
-  ]\n\
-}' > /usr/local/xray/config.json
+# Создаем config.json (БЕЗ ОШИБОК)
+RUN cat > /usr/local/xray/config.json << 'EOF'
+{
+  "log": {
+    "loglevel": "warning"
+  },
+  "inbounds": [
+    {
+      "port": 8080,
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "30a587b7-ef47-4706-bc55-f9f7d34b468a"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "wsSettings": {
+          "path": "/vless"
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom"
+    }
+  ]
+}
+EOF
 
-# Порты
-EXPOSE 8080
+# Создаем скрипт запуска (запускает Xray + health check)
+RUN cat > /start.sh << 'EOF'
+#!/bin/sh
+echo "🚀 Запуск Xray..."
+/usr/local/xray/xray -config /usr/local/xray/config.json &
 
-# Запуск
-CMD /usr/local/xray/xray -config /usr/local/xray/config.json
+echo "📡 Запуск health check сервера на порту 8081..."
+while true; do
+  echo -e "HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK" | nc -l -p 8081 -q 1
+done
+EOF
+
+RUN chmod +x /start.sh
+
+EXPOSE 8080 8081
+
+CMD ["/start.sh"]

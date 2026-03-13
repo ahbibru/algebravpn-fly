@@ -1,11 +1,11 @@
-app = "algebravpn"
+app = "algebravpn-fly"
 primary_region = "fra"
 
 [build]
   dockerfile = "Dockerfile"
 
 [http_service]
-  internal_port = 8080
+  internal_port = 8080  # ДОЛЖЕН СОВПАДАТЬ С PORT В КОНФИГЕ
   force_https = true
   auto_stop_machines = false
   auto_start_machines = true
